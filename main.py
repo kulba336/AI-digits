@@ -33,3 +33,10 @@ for i in range(40):
 plt.suptitle('Digits example', fontsize = 16, fontweight = 'bold')
 plt.tight_layout()
 plt.savefig('1_digits_example.png', dpi = 150, bbox_inches = 'tight')
+
+# Просмотр одной цифры
+sample_digit_index = 0
+print(f'\nIndex of digit: {sample_digit_index}\n'
+      f'Target digit: {target_train[sample_digit_index]}\n'
+      f'Digit shape: {data_train[sample_digit_index].shape}\n')
+print(data_train[sample_digit_index])
