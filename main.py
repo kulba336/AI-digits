@@ -40,3 +40,11 @@ print(f'\nIndex of digit: {sample_digit_index}\n'
       f'Target digit: {target_train[sample_digit_index]}\n'
       f'Digit shape: {data_train[sample_digit_index].shape}\n')
 print(data_train[sample_digit_index])
+
+# === 2. Препроцессинг ===
+# Нормализация входных данных (0-255 -> 0-1)
+data_train_norm = data_train.astype('float32')/255.0
+data_test_norm = data_test.astype('float32')/255.0
+
+print(f'Before norm: [{data_train.min()} - {data_train.max()}]\n'
+      f'After norm: [{data_train_norm.min():.2f} - {data_train_norm.max():.2f}]\n')
