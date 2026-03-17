@@ -72,3 +72,10 @@ target_test_cat = to_categorical(target_test, 10)
 print(f'\nBefore one-hot: {target_train.shape}\n'
       f'After one-hot: {target_train_cat.shape}\n'
       f'Example target[0]: {target_train[0]} -> {target_train_cat[0]}\n')
+
+# Завершение препроцессинга
+print(f'Finished preprocessing\n'
+      f'data_train_flat: {data_train_flat.shape}\n'
+      f'data_test_flat: {data_test_flat.shape}\n'
+      f'target_train_cat: {target_train_cat.shape}\n'
+      f'target_test_cat: {target_test_cat.shape}')
