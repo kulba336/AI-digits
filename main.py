@@ -1,6 +1,8 @@
-from tensorflow.keras.datasets import mnist
+from keras.datasets import mnist
 import matplotlib.pyplot as plt 
 import numpy as np
+
+from keras.utils import to_categorical
 
 # === 1. Подгрузка датасета ===
 (data_train, target_train), (data_test, target_test) = mnist.load_data()
@@ -62,3 +64,11 @@ print(f'After reshape:\n'
       f'single digit: {data_train_flat[0].shape}\n')
 
 print(f'Check: {28} * {28} = {28*28}')
+
+# One-hot encoding
+target_train_cat = to_categorical(target_train, 10)
+target_test_cat = to_categorical(target_test, 10)
+
+print(f'\nBefore one-hot: {target_train.shape}\n'
+      f'After one-hot: {target_train_cat.shape}\n'
+      f'Example target[0]: {target_train[0]} -> {target_train_cat[0]}\n')
