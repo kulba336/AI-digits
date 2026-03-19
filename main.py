@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from keras.utils import to_categorical
+from keras.models import Sequential
+from keras.layers import Dense, Dropout
+from keras.callbacks import EarlyStopping
 
 # === 1. Подгрузка датасета ===
 (data_train, target_train), (data_test, target_test) = mnist.load_data()
@@ -79,3 +82,71 @@ print(f'Finished preprocessing\n'
       f'data_test_flat: {data_test_flat.shape}\n'
       f'target_train_cat: {target_train_cat.shape}\n'
       f'target_test_cat: {target_test_cat.shape}')
+
+# === 3. Создание модели ===
+model = Sequential([
+    Dense(512,activation = 'relu', input_shape = (784,)),
+    Dropout(0.2), # отключение 20% нейронов ждя избежания переобучения (подать на выход нейрона значение 0)
+    Dense(256, activation = 'relu'),
+    Dropout(0.2),
+    Dense(10, activation = 'softmax')
+])
+
+model.summary()
+
+# Компиляция
+model.compile(
+    optimizer = 'adam',
+    loss = 'categorical_crossentropy',
+    metrics = ['accuracy']
+)
+
+# Обучение
+# Ранний стоп, для предотвращения ухудшения обучения
+# срабатывает в конце каждой эпохи и каждого обновления весов (batch_size)
+early_stop = EarlyStopping(
+    monitor = 'val_loss', # что отслеживаем
+    patience = 5, # сколько шагов ухудшения можно допустить перед стопом
+    restore_best_weights = True, # во время стопа откатиться к лучшим значениям весов у нейронов
+    verbose = 1 # уведомление о срабатывании (0 - нет, 1 - есть)
+)
+
+learn = model.fit(
+    data_train_flat, target_train_cat,
+    epochs = 1,
+    batch_size = 128,
+    validation_split = 0.1,
+    callbacks = [early_stop], # подключение раннего стопа
+    verbose = 1
+)
+
+# Тестирование
+test_loss, test_acc = model.evaluate(data_test_flat, target_test_cat, verbose = 0)
+
+print(f'Test loss: {test_loss:.4f}\n'
+      f'Test accuracy: {test_acc:.4f} ({test_acc * 100:.1f}%)')
+
+# Графики
+fig, (ax1,ax2) = plt.subplots(1,2,figsize=(14,5))
+
+# Accuracy
+ax1.plot(learn.history['accuracy'], label = 'Train', linewidth = 2)
+ax1.plot(learn.history['val_accuracy'], label = 'Validation', linewidth = 2)
+ax1.axhline(y = test_acc, color = 'red', linestyle = '--', label = f'Test ({test_acc:.4f})',linewidth = 2)
+ax1.set_title('Model accuracy', fontsize = 14, fontweight = 'bold')
+ax1.set_xlabel('Epoch')
+ax1.set_ylabel('Accuracy')
+ax1.legend()
+ax1.grid(True, alpha = 0.3)
+
+# Loss
+ax2.plot(learn.history['loss'],label = 'Train',linewidth = 2)
+ax2.plot(learn.history['val_loss'], label = 'Validation', linewidth = 2)
+ax2.set_title('Model loss', fontsize = 14, fontweight = 'bold')
+ax2.set_xlabel('Epoch')
+ax2.set_ylabel('Loss')
+ax2.legend()
+ax2.grid(True, alpha = 0.3)
+
+plt.tight_layout()
+plt.savefig('2_model_fit.png', dpi = 150, bbox_inches = 'tight')
