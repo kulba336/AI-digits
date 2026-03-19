@@ -125,3 +125,28 @@ test_loss, test_acc = model.evaluate(data_test_flat, target_test_cat, verbose = 
 
 print(f'Test loss: {test_loss:.4f}\n'
       f'Test accuracy: {test_acc:.4f} ({test_acc * 100:.1f}%)')
+
+# Графики
+fig, (ax1,ax2) = plt.subplots(1,2,figsize=(14,5))
+
+# Accuracy
+ax1.plot(learn.history['accuracy'], label = 'Train', linewidth = 2)
+ax1.plot(learn.history['val_accuracy'], label = 'Validation', linewidth = 2)
+ax1.axhline(y = test_acc, color = 'red', linestyle = '--', label = f'Test ({test_acc:.4f})',linewidth = 2)
+ax1.set_title('Model accuracy', fontsize = 14, fontweight = 'bold')
+ax1.set_xlabel('Epoch')
+ax1.set_ylabel('Accuracy')
+ax1.legend()
+ax1.grid(True, alpha = 0.3)
+
+# Loss
+ax2.plot(learn.history['loss'],label = 'Train',linewidth = 2)
+ax2.plot(learn.history['val_loss'], label = 'Validation', linewidth = 2)
+ax2.set_title('Model loss', fontsize = 14, fontweight = 'bold')
+ax2.set_xlabel('Epoch')
+ax2.set_ylabel('Loss')
+ax2.legend()
+ax2.grid(True, alpha = 0.3)
+
+plt.tight_layout()
+plt.savefig('2_model_fit.png', dpi = 150, bbox_inches = 'tight')
