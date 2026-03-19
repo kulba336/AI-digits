@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from keras.utils import to_categorical
+from keras.models import Sequential
+from keras.layers import Dense, Dropout
 
 # === 1. Подгрузка датасета ===
 (data_train, target_train), (data_test, target_test) = mnist.load_data()
@@ -79,3 +81,14 @@ print(f'Finished preprocessing\n'
       f'data_test_flat: {data_test_flat.shape}\n'
       f'target_train_cat: {target_train_cat.shape}\n'
       f'target_test_cat: {target_test_cat.shape}')
+
+# === 3. Создание модели ===
+model = Sequential([
+    Dense(512,activation = 'relu', input_shape = (784,)),
+    Dropout(0.2), # отключение 20% нейронов ждя избежания переобучения (подать на выход нейрона значение 0)
+    Dense(256, activation = 'relu'),
+    Dropout(0.2),
+    Dense(10, activation = 'softmax')
+])
+
+model.summary()
