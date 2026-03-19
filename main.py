@@ -5,6 +5,7 @@ import numpy as np
 from keras.utils import to_categorical
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
+from keras.callbacks import EarlyStopping
 
 # === 1. Подгрузка датасета ===
 (data_train, target_train), (data_test, target_test) = mnist.load_data()
@@ -92,3 +93,10 @@ model = Sequential([
 ])
 
 model.summary()
+
+# Компиляция
+model.compile(
+    optimizer = 'adam',
+    loss = 'categorical_crossentropy',
+    metrics = ['accuracy']
+)
