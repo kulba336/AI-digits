@@ -119,3 +119,9 @@ learn = model.fit(
     callbacks = [early_stop], # подключение раннего стопа
     verbose = 1
 )
+
+# Тестирование
+test_loss, test_acc = model.evaluate(data_test_flat, target_test_cat, verbose = 0)
+
+print(f'Test loss: {test_loss:.4f}\n'
+      f'Test accuracy: {test_acc:.4f} ({test_acc * 100:.1f}%)')
