@@ -190,10 +190,14 @@ predictions = model.predict(data_test_flat)
 predicted_classes = np.argmax(predictions, axis = 1)
 true_target_classes = target_test
 
-# Classification REport
+# Classification Report
 print(f'\nClassification_report:')
 print(classification_report(
     true_target_classes, # истинные выходные классы
     predicted_classes, # предсказанные классы
     target_names = [str(i) for i in range(10)] # наименования чисел статистики (0-9)
 ))
+
+# Confusion Matrix
+conf_matrix = confusion_matrix(true_target_classes, predicted_classes)
+print(f'\nConfusion matrix:\n {conf_matrix}')
