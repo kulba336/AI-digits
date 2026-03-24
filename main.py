@@ -181,3 +181,8 @@ plt.savefig('2_model_fit.png', dpi = 150, bbox_inches = 'tight')
 # 2. Confusion Matrix - таблица ошибок
 # Матрица предсказанных классов
 # Идеальный вариант - ненулевая диагональ, остальные поля = 0
+
+# Prediction (предсказания)
+predictions = model.predict(data_test_flat)
+prediction_classes = np.argmax(predictions, axis = 1)
+true_target_classes = target_test
