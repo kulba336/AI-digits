@@ -7,6 +7,9 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.callbacks import EarlyStopping
 
+from sklearn.metrics import classification_report, confusion_matrix
+import seaborn as sns
+
 # === 1. Подгрузка датасета ===
 (data_train, target_train), (data_test, target_test) = mnist.load_data()
 
@@ -184,5 +187,13 @@ plt.savefig('2_model_fit.png', dpi = 150, bbox_inches = 'tight')
 
 # Prediction (предсказания)
 predictions = model.predict(data_test_flat)
-prediction_classes = np.argmax(predictions, axis = 1)
+predicted_classes = np.argmax(predictions, axis = 1)
 true_target_classes = target_test
+
+# Classification REport
+print(f'\nClassification_report:')
+print(classification_report(
+    true_target_classes, # истинные выходные классы
+    predicted_classes, # предсказанные классы
+    target_names = [str(i) for i in range(10)] # наименования чисел статистики (0-9)
+))
