@@ -201,3 +201,7 @@ print(classification_report(
 # Confusion Matrix
 conf_matrix = confusion_matrix(true_target_classes, predicted_classes)
 print(f'\nConfusion matrix:\n {conf_matrix}')
+
+# Подсчёт ошибочных пар
+print(f'\nЧастые ошибки:')
+errors = []
