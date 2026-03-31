@@ -205,3 +205,13 @@ print(f'\nConfusion matrix:\n {conf_matrix}')
 # Подсчёт ошибочных пар
 print(f'\nЧастые ошибки:')
 errors = []
+
+for i in range(10):
+    for j in range(10):
+        if i != j and conf_matrix[i,j] > 0:
+            errors.append((i,j,conf_matrix[i,j]))
+
+errors.sort(key = lambda x: x[2], reverse = True)
+
+for true, pred, errors in errors[:10]:
+    print(f'{true} -> {pred}: {errors} раз')
