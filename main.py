@@ -233,3 +233,27 @@ graph.set_ylabel('True Classes', fontsize = 12)
 plt.tight_layout()
 plt.savefig('3_confusion_matrix.png', dpi=150, bbox_inches = 'tight')
 
+# Визуализация предсказаний
+fig_1, axes = plt.subplots(4,5,figsize=(15,12))
+
+for i in range(20):
+      ax = axes[i//5, i%5]
+      ax.imshow(data_test[i],cmap = 'gray')
+      true_label = true_target_classes[i]
+      pred_label = predicted_classes[i]
+      confidence = predictions[i][pred_label]*100
+
+      if true_label == pred_label:
+            text_color = 'green'
+            title = f'{pred_label} ({confidence:.0f}%)'
+      else:
+            text_color = 'red'
+            title = f'True: {true_label}, Predicted: {pred_label} ({confidence:.0f}%)'
+
+      ax.set_title(title, color = text_color, fontsize = 10, fontweight = 'bold')  
+      ax.axis('off')
+
+plt.suptitle('Примеры предсказаний (зеленый - верно, красный - неверно)', fontsize = 14, fontweight = 'bold')
+plt.tight_layout()
+plt.savefig('4_predict_example.png', dpi = 150, bbox_inches = 'tight')
+
