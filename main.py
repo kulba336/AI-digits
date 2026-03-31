@@ -257,3 +257,28 @@ plt.suptitle('Примеры предсказаний (зеленый - верн
 plt.tight_layout()
 plt.savefig('4_predict_example.png', dpi = 150, bbox_inches = 'tight')
 
+# Визуализация частых ошибок
+error_indices = np.where(predicted_classes != true_target_classes)[0]
+print(f'\nВсего ошибок: {len(error_indices)} из {len(target_test)} ({len(error_indices) / len(target_test)*100:.1f}%)')
+
+error_confidence = predictions[error_indices].max(axis = 1)
+worst_error = error_indices[np.argsort(-error_confidence)[20:]]
+
+fig_2, axes = plt.subplots(4,5,figsize = (15,12))
+
+for index, error_idx in enumerate(worst_error):
+      ax = axes[index // 5, index % 5]
+      ax.imshow(data_test[error_idx], cmap = 'gray')
+      true_label = true_target_classes[error_idx]
+      pred_label = predicted_classes[error_idx]
+      confidence = predictions[error_idx][pred_label]*100
+
+      ax.set_title(f'True: {true_label}, Predicted: {pred_label} ({confidence:.0f}%)',
+                  color = 'red',
+                  fontsize = 10,
+                  fontweight = 'bold')
+      ax.axis('off')
+
+plt.suptitle('20 самых уверенных ошибок', fontsize = 14, fontweight = 'bold')
+plt.tight_layout()
+plt.savefig('5_worst_errors.png', dpi = 150, bbox_inches = 'tight')
