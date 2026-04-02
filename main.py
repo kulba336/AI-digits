@@ -391,3 +391,31 @@ for bar, acc in zip(bars, accs):
           va = 'bottom', # вертикальное выравнивание
           fontweight = 'bold' # толщина шрифта
      )
+
+# Параметры х Точность
+ax = axes[1]
+param_list = [param[2] for param in model_comparison]
+ax.scatter(                       # точечный график
+     param_list,                  # координата Х для точки
+     accs,                        # координата У для точки
+     s = 200,                     # размер точки
+     c = colors,                  # цвет точки
+     edgecolor = 'black',         # цвет обводки
+     linewidth = 2                # толщина линии
+)
+
+for i, name in enumerate(names):
+     ax.annotate(
+          name,
+          (param_list[i], accs[i]),
+          xytext = (5,5),
+          textcoords = 'offset points'
+     )
+
+ax.set_ylabel('Test Accuracy')
+ax.set_xlabel('Parameters')
+ax.set_title('Accuracy x Parameters', fontweight = 'bold')
+ax.grid(True, alpha = 0.3)
+
+plt.tight_layout()
+plt.savefig('6_model_comparison.png', dpi = 150, bbox_inches = 'tight')
