@@ -383,3 +383,11 @@ ax.grid(axis = 'y', alpha = 0.3)
 
 for bar, acc in zip(bars, accs):
      height = bar.get_height()
+     ax.text(
+          bar.get_x() + bar.get_width() / 2., # координата x текста
+          height + 0.001, # координата y текста
+          f'{acc:.4f}', # текст для отображения
+          ha = 'center', # горизонтальное выравнивание
+          va = 'bottom', # вертикальное выравнивание
+          fontweight = 'bold' # толщина шрифта
+     )
