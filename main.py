@@ -4,7 +4,7 @@ import numpy as np
 
 from keras.utils import to_categorical
 from keras.models import Sequential
-from keras.layers import Dense, Dropout
+from keras.layers import Dense, Dropout, BatchNormalization, Activation
 from keras.callbacks import EarlyStopping
 
 from sklearn.metrics import classification_report, confusion_matrix
@@ -282,3 +282,140 @@ for index, error_idx in enumerate(worst_error):
 plt.suptitle('20 самых уверенных ошибок', fontsize = 14, fontweight = 'bold')
 plt.tight_layout()
 plt.savefig('5_worst_errors.png', dpi = 150, bbox_inches = 'tight')
+
+# === 5. Улучшение модели ===
+# Модель 2 - более глубокая
+model_v2 = Sequential([
+     Dense(512, activation = 'relu', input_shape = (784,)),
+     Dropout(0.3),
+     Dense(256, activation = 'relu'),
+     Dropout(0.3),
+     Dense(128, activation = 'relu'),
+     Dropout(0.2),
+     Dense(10, activation = 'softmax')
+])
+
+model_v2.compile(
+     optimizer = 'adam',
+     loss = 'categorical_crossentropy',
+     metrics = ['accuracy']
+)
+
+print(f'\nМодель v2 (более глубокая)')
+model_v2.summary()
+
+model_v2_learn = model_v2.fit(
+     data_train_flat, target_train_cat,
+     epochs = 1,
+     batch_size = 128,
+     validation_split = 0.1,
+     callbacks = [early_stop],
+     verbose = 1
+)
+
+test_acc_v2 = model_v2.evaluate(data_test_flat, target_test_cat, verbose = 0)[1]
+print(f'Test accuracy: {test_acc_v2:.2f}')
+
+# Модель 3 - с нормализацией
+model_v3 = Sequential([
+     Dense(512, input_shape = (784,)),
+     BatchNormalization(),
+     Activation('relu'),
+     Dropout(0.3),
+     Dense(256),
+     BatchNormalization(),
+     Activation('relu'),
+     Dropout(0.2),
+     Dense(10, activation = 'softmax')
+])
+
+model_v3.compile(
+     optimizer = 'adam',
+     loss = 'categorical_crossentropy',
+     metrics = ['accuracy']
+)
+
+print(f'\nМодель v3 (более глубокая)')
+model_v3.summary()
+
+model_v3_learn = model_v3.fit(
+     data_train_flat, target_train_cat,
+     epochs = 1,
+     batch_size = 128,
+     validation_split = 0.1,
+     callbacks = [early_stop],
+     verbose = 1
+)
+
+test_acc_v3 = model_v3.evaluate(data_test_flat, target_test_cat, verbose = 0)[1]
+print(f'Test accuracy: {test_acc_v3:.2f}')
+
+# Сравнение моделей
+model_comparison = [
+     ('Базовая модель', test_acc, model.count_params()),
+     ('Модель v2 (глубокая)', test_acc_v2, model_v2.count_params()),
+     ('Модель v3 (с BatchNorm)', test_acc_v3, model_v3.count_params())
+]
+
+print(f'\n{'Модель':<30} {'Test Accuracy':<15} {'Кол-во параметров':<15}')
+for name, acc, params in model_comparison:
+     print(f'{name:<30} {acc:.2f} ({acc*100:.2f}%) {params:>15,}')
+
+best_model = max(model_comparison, key = lambda x: x[1])[0]
+print(f'\nЛучшая модель: {best_model}')
+
+# Визуализация сравнения
+fig_3, axes = plt.subplots(1,2,figsize = (15,5))
+
+# график точности (accuracy
+ax = axes[0]
+names = [param[0] for param in model_comparison]
+accs = [param[1] for param in model_comparison]
+colors = ['skyblue','lightgreen','loghtcoral']
+
+bars = ax.bar(range(3), accs, color = colors, edgecolor = 'black', linewidth = 2)
+ax.set_xticks(range(3))
+ax.set_xticklabels(names, rotation = 15, ha = 'right')
+ax.set_ylabel('Test Accuracy')
+ax.set_title('Model comparison', fontweight = 'bold')
+ax.set_ylim([0.94,1]) # ограничения значений по оси Y
+ax.grid(axis = 'y', alpha = 0.3)
+
+for bar, acc in zip(bars, accs):
+     height = bar.get_height()
+     ax.text(
+          bar.get_x() + bar.get_width() / 2., # координата x текста
+          height + 0.001, # координата y текста
+          f'{acc:.4f}', # текст для отображения
+          ha = 'center', # горизонтальное выравнивание
+          va = 'bottom', # вертикальное выравнивание
+          fontweight = 'bold' # толщина шрифта
+     )
+
+# Параметры х Точность
+ax = axes[1]
+param_list = [param[2] for param in model_comparison]
+ax.scatter(                       # точечный график
+     param_list,                  # координата Х для точки
+     accs,                        # координата У для точки
+     s = 200,                     # размер точки
+     c = colors,                  # цвет точки
+     edgecolor = 'black',         # цвет обводки
+     linewidth = 2                # толщина линии
+)
+
+for i, name in enumerate(names):
+     ax.annotate(
+          name,
+          (param_list[i], accs[i]),
+          xytext = (5,5),
+          textcoords = 'offset points'
+     )
+
+ax.set_ylabel('Test Accuracy')
+ax.set_xlabel('Parameters')
+ax.set_title('Accuracy x Parameters', fontweight = 'bold')
+ax.grid(True, alpha = 0.3)
+
+plt.tight_layout()
+plt.savefig('6_model_comparison.png', dpi = 150, bbox_inches = 'tight')
