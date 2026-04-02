@@ -363,3 +363,23 @@ for name, acc, params in model_comparison:
 
 best_model = max(model_comparison, key = lambda x: x[1])[0]
 print(f'\nЛучшая модель: {best_model}')
+
+# Визуализация сравнения
+fig_3, axes = plt.subplots(1,2,figsize = (15,5))
+
+# график точности (accuracy
+ax = axes[0]
+names = [param[0] for param in model_comparison]
+accs = [param[1] for param in model_comparison]
+colors = ['skyblue','lightgreen','loghtcoral']
+
+bars = ax.bar(range(3), accs, color = colors, edgecolor = 'black', linewidth = 2)
+ax.set_xticks(range(3))
+ax.set_xticklabels(names, rotation = 15, ha = 'right')
+ax.set_ylabel('Test Accuracy')
+ax.set_title('Model comparison', fontweight = 'bold')
+ax.set_ylim([0.94,1]) # ограничения значений по оси Y
+ax.grid(axis = 'y', alpha = 0.3)
+
+for bar, acc in zip(bars, accs):
+     height = bar.get_height()
