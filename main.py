@@ -7,6 +7,9 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout
 from keras.callbacks import EarlyStopping
 
+from sklearn.metrics import classification_report, confusion_matrix
+import seaborn as sns
+
 # === 1. Подгрузка датасета ===
 (data_train, target_train), (data_test, target_test) = mnist.load_data()
 
@@ -150,3 +153,132 @@ ax2.grid(True, alpha = 0.3)
 
 plt.tight_layout()
 plt.savefig('2_model_fit.png', dpi = 150, bbox_inches = 'tight')
+
+# === 4. Анализ предсказаний ===
+# Виды ошибок
+      # 1. True Positive (TP) - истинно положительный
+      # Истина: 1, предсказано: 1 (предсказано: 5, реально тоже 5)
+
+      # 2. True Negative (TN) - истинно отричательный
+      # Истина: 0, предсказано: 0 (предсказано 5, но реально не 5)
+
+      # 3. False Positive (FP) - ложно положительный
+      # Истина: 0, предсказано: 1 (реально 5, но предсказано не 5)
+
+      # 4. False Negative (FN) - ложно отрицательный
+      # Истина: 1, предсказано: 0 (реально не 5 и предсказано не 5)
+
+# 1. Classification Report - детальная статистика по всем классам
+# Критерии отчета
+      # 1. Precision (точность) - TP / (TP + FP)
+      # из всех предсказанных чисел '5', сколько реально было '5'?
+
+      # 2. Recall (полнота) - TP / (TP + FN)
+      # из всех настоящих чисел '5', сколько нашла модель
+
+      # 3. F1-Score (гармоническое среднее) - 2 * (Precision * Recall) / (Precision + Recall)
+      # Среднее значение между Precision и Recall
+
+      # 4. Support - сколько примеров класса было в тестах
+
+# 2. Confusion Matrix - таблица ошибок
+# Матрица предсказанных классов
+# Идеальный вариант - ненулевая диагональ, остальные поля = 0
+
+# Prediction (предсказания)
+predictions = model.predict(data_test_flat)
+predicted_classes = np.argmax(predictions, axis = 1)
+true_target_classes = target_test
+
+# Classification Report
+print(f'\nClassification_report:')
+print(classification_report(
+    true_target_classes, # истинные выходные классы
+    predicted_classes, # предсказанные классы
+    target_names = [str(i) for i in range(10)] # наименования чисел статистики (0-9)
+))
+
+# Confusion Matrix
+conf_matrix = confusion_matrix(true_target_classes, predicted_classes)
+print(f'\nConfusion matrix:\n {conf_matrix}')
+
+# Подсчёт ошибочных пар
+print(f'\nЧастые ошибки:')
+errors = []
+
+for i in range(10):
+    for j in range(10):
+        if i != j and conf_matrix[i,j] > 0:
+            errors.append((i,j,conf_matrix[i,j]))
+
+errors.sort(key = lambda x: x[2], reverse = True)
+
+for true, pred, errors in errors[:10]:
+    print(f'{true} -> {pred}: {errors} раз')
+
+# Визуализация Confusion Matrix
+fig, graph = plt.subplots(figsize = (10,8))
+sns.heatmap(conf_matrix, # матрица, на основе которой рисуем график
+            annot = True, # заголовки столбцов и строк (числа от 0 до 9)
+            fmt = 'd', # формат чисел (d - целые числа)
+            ax = graph, # рисуем график в области graph
+            cmap = 'Blues', # синяя цветовая схема (градиент от белого к темно синему)
+            xticklabels = range(10), # подписи по оси X 
+            yticklabels = range(10) # подписи по оси Y
+)
+graph.set_title('Confusion Matrix', fontsize = 16, fontweight = 'bold')
+graph.set_xlabel('Predicted', fontsize = 12)
+graph.set_ylabel('True Classes', fontsize = 12)
+
+plt.tight_layout()
+plt.savefig('3_confusion_matrix.png', dpi=150, bbox_inches = 'tight')
+
+# Визуализация предсказаний
+fig_1, axes = plt.subplots(4,5,figsize=(15,12))
+
+for i in range(20):
+      ax = axes[i//5, i%5]
+      ax.imshow(data_test[i],cmap = 'gray')
+      true_label = true_target_classes[i]
+      pred_label = predicted_classes[i]
+      confidence = predictions[i][pred_label]*100
+
+      if true_label == pred_label:
+            text_color = 'green'
+            title = f'{pred_label} ({confidence:.0f}%)'
+      else:
+            text_color = 'red'
+            title = f'True: {true_label}, Predicted: {pred_label} ({confidence:.0f}%)'
+
+      ax.set_title(title, color = text_color, fontsize = 10, fontweight = 'bold')  
+      ax.axis('off')
+
+plt.suptitle('Примеры предсказаний (зеленый - верно, красный - неверно)', fontsize = 14, fontweight = 'bold')
+plt.tight_layout()
+plt.savefig('4_predict_example.png', dpi = 150, bbox_inches = 'tight')
+
+# Визуализация частых ошибок
+error_indices = np.where(predicted_classes != true_target_classes)[0]
+print(f'\nВсего ошибок: {len(error_indices)} из {len(target_test)} ({len(error_indices) / len(target_test)*100:.1f}%)')
+
+error_confidence = predictions[error_indices].max(axis = 1)
+worst_error = error_indices[np.argsort(-error_confidence)[20:]]
+
+fig_2, axes = plt.subplots(4,5,figsize = (15,12))
+
+for index, error_idx in enumerate(worst_error):
+      ax = axes[index // 5, index % 5]
+      ax.imshow(data_test[error_idx], cmap = 'gray')
+      true_label = true_target_classes[error_idx]
+      pred_label = predicted_classes[error_idx]
+      confidence = predictions[error_idx][pred_label]*100
+
+      ax.set_title(f'True: {true_label}, Predicted: {pred_label} ({confidence:.0f}%)',
+                  color = 'red',
+                  fontsize = 10,
+                  fontweight = 'bold')
+      ax.axis('off')
+
+plt.suptitle('20 самых уверенных ошибок', fontsize = 14, fontweight = 'bold')
+plt.tight_layout()
+plt.savefig('5_worst_errors.png', dpi = 150, bbox_inches = 'tight')
