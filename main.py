@@ -282,3 +282,36 @@ for index, error_idx in enumerate(worst_error):
 plt.suptitle('20 самых уверенных ошибок', fontsize = 14, fontweight = 'bold')
 plt.tight_layout()
 plt.savefig('5_worst_errors.png', dpi = 150, bbox_inches = 'tight')
+
+# === 5. Улучшение модели ===
+# Модель 2 - более глубокая
+model_v2 = Sequential([
+     Dense(512, activation = 'relu', input_shape = (784,)),
+     Dropout(0.3),
+     Dense(256, activation = 'relu'),
+     Dropout(0.3),
+     Dense(128, activation = 'relu'),
+     Dropout(0.2),
+     Dense(10, activation = 'softmax')
+])
+
+model_v2.compile(
+     optimizer = 'adam',
+     loss = 'categorical_crossentropy',
+     metrics = ['accuracy']
+)
+
+print(f'\nМоедль v2 (более глубокая)')
+model_v2.summary()
+
+model_v2_learn = model_v2.fit(
+     data_train_flat, target_train_cat,
+     epochs = 1,
+     batch_size = 128,
+     validation_split = 0.1,
+     callbacks = [early_stop],
+     verbose = 1
+)
+
+test_acc_v2 = model_v2.evaluate(data_test_flat, target_test_cat, verbose = 0)[1]
+print(f'Test accuracy: {test_acc_v2:.2f}')
